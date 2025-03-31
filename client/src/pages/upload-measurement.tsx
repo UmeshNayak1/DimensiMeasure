@@ -153,6 +153,14 @@ export default function UploadMeasurement() {
         title: "Measurement saved",
         description: "Your measurement has been saved successfully.",
       });
+      
+      // Option to reset the form for a fresh start
+      setSelectedFile(null);
+      setImagePreview(null);
+      setOriginalImage(null);
+      setAnnotatedImage(null);
+      setShowResults(false);
+      setMeasurementResults(null);
     },
     onError: (error) => {
       toast({
@@ -308,6 +316,32 @@ export default function UploadMeasurement() {
                     alt="Measurement result" 
                     className="object-contain w-full h-full"
                   />
+                )}
+                
+                {/* Floating Save Button for measured images */}
+                {measurementResults && (
+                  <div className="absolute bottom-4 right-4 flex space-x-2">
+                    <Button 
+                      size="lg" 
+                      className="shadow-lg bg-green-600 hover:bg-green-700"
+                      onClick={() => saveMeasurement()}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                          </svg>
+                          Save Measurement
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 )}
                 
                 {/* Measurement Overlays */}

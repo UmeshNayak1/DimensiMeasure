@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/use-auth';
 import { useCamera } from '@/hooks/use-camera';
 import { WebcamWithProcessing } from '@/components/ui/webcam';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -209,27 +209,55 @@ export default function RealtimeMeasurement() {
           </div>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="camera-viewport rounded-lg w-full relative" style={{ height: '500px' }}>
-            {cameraActive ? (
-              <WebcamWithProcessing 
-                onCapture={handleCapture}
-                className="h-full w-full"
-                isProcessing={isProcessing}
-                measurementData={measurementData}
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-900 rounded-lg">
-                <div className="text-center text-white p-6">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <h4 className="mt-4 text-lg font-medium">Camera Access Required</h4>
-                  <p className="mt-2 text-sm text-gray-300">We need permission to access your camera for real-time measurements</p>
-                  <Button className="mt-4" onClick={handleEnableCamera}>
-                    Enable Camera
-                  </Button>
+          <div className="relative">
+            <div className="camera-viewport rounded-lg w-full" style={{ height: '500px' }}>
+              {cameraActive ? (
+                <WebcamWithProcessing 
+                  onCapture={handleCapture}
+                  className="h-full w-full"
+                  isProcessing={isProcessing}
+                  measurementData={measurementData}
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900 rounded-lg">
+                  <div className="text-center text-white p-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <h4 className="mt-4 text-lg font-medium">Camera Access Required</h4>
+                    <p className="mt-2 text-sm text-gray-300">We need permission to access your camera for real-time measurements</p>
+                    <Button className="mt-4" onClick={handleEnableCamera}>
+                      Enable Camera
+                    </Button>
+                  </div>
                 </div>
+              )}
+            </div>
+            
+            {/* Floating Save Button for captured images */}
+            {measurementData && capturedImage && (
+              <div className="absolute bottom-4 right-4 flex space-x-2">
+                <Button 
+                  size="lg" 
+                  className="shadow-lg bg-green-600 hover:bg-green-700"
+                  onClick={() => saveMeasurement()}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                      Save Measurement
+                    </>
+                  )}
+                </Button>
               </div>
             )}
           </div>

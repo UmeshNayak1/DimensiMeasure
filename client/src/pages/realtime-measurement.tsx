@@ -34,6 +34,7 @@ export default function RealtimeMeasurement() {
     objectName: string;
     dimensions: string;
     confidence: number;
+    bbox?: [number, number, number, number]; // x1, y1, x2, y2
   } | null>(null);
   
   // Handle camera enable
@@ -79,7 +80,8 @@ export default function RealtimeMeasurement() {
         setMeasurementData({
           objectName: bestResult.objectName,
           dimensions: bestResult.dimensions,
-          confidence: Math.round(bestResult.confidence * 100)
+          confidence: Math.round(bestResult.confidence * 100),
+          bbox: bestResult.bbox, // Include the bounding box data
         });
       } else {
         toast({

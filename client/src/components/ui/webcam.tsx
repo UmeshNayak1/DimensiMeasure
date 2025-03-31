@@ -117,6 +117,7 @@ interface WebcamWithProcessingProps extends WebcamCaptureProps {
     objectName: string;
     dimensions: string;
     confidence: number;
+    bbox?: [number, number, number, number]; // x1, y1, x2, y2
   } | null;
 }
 
@@ -126,8 +127,10 @@ export function WebcamWithProcessing({
   isProcessing = false,
   measurementData = null
 }: WebcamWithProcessingProps) {
+  const webcamRef = useRef<HTMLDivElement>(null);
+  
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} ref={webcamRef}>
       <WebcamCapture onCapture={onCapture} className={className} />
       
       {/* Loading overlay */}
@@ -136,6 +139,30 @@ export function WebcamWithProcessing({
           <div className="text-center">
             <div className="loading-spinner mx-auto mb-4 border-4 border-gray-600 border-t-primary w-12 h-12 rounded-full animate-spin"></div>
             <p className="text-white">Processing measurement...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Bounding box overlay */}
+      {!isProcessing && measurementData && measurementData.bbox && (
+        <div 
+          className="absolute border-2 border-blue-500 rounded-sm z-10"
+          style={{
+            top: `${measurementData.bbox[1]}px`,
+            left: `${measurementData.bbox[0]}px`,
+            width: `${measurementData.bbox[2] - measurementData.bbox[0]}px`,
+            height: `${measurementData.bbox[3] - measurementData.bbox[1]}px`,
+          }}
+        >
+          {/* Label on top of bounding box */}
+          <div 
+            className="absolute -top-7 left-0 right-0 mx-auto px-2 py-1 bg-blue-600 text-white text-xs font-semibold rounded flex items-center justify-center max-w-fit"
+            style={{ 
+              textShadow: '0 0 3px rgba(0,0,0,0.5)',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.15)'
+            }}
+          >
+            {measurementData.objectName}: {measurementData.dimensions}
           </div>
         </div>
       )}

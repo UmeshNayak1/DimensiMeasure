@@ -27,12 +27,13 @@ export default function UploadMeasurement() {
   const [showResults, setShowResults] = useState(false);
   const [processingResults, setProcessingResults] = useState(false);
   
-  // Mock measurement results (will be replaced with real data from API)
+  // Measurement results with bounding box data
   const [measurementResults, setMeasurementResults] = useState<{
     objects: Array<{
       name: string;
       dimensions: string;
       confidence: number;
+      bbox?: [number, number, number, number]; // x1, y1, x2, y2
     }>;
   } | null>(null);
 
@@ -82,7 +83,8 @@ export default function UploadMeasurement() {
           objects: result.measurements.map((item: any) => ({
             name: item.objectName,
             dimensions: item.dimensions,
-            confidence: Math.round(item.confidence * 100)
+            confidence: Math.round(item.confidence * 100),
+            bbox: item.bbox, // Include bounding box coordinates
           }))
         };
         
@@ -276,13 +278,78 @@ export default function UploadMeasurement() {
                 )}
                 
                 {/* Measurement Overlays */}
-                {/* Simple mock overlays - in a real app these would be positioned based on ML model output */}
-                <div className="absolute" style={{ top: '120px', left: '100px', width: '200px', height: '100px', border: '2px dashed #3B82F6', borderRadius: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 600, textShadow: '0 0 3px rgba(0,0,0,0.8)' }}>
-                  200 × 100 cm
-                </div>
-                <div className="absolute" style={{ top: '240px', left: '150px', width: '100px', height: '40px', border: '2px dashed #3B82F6', borderRadius: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 600, textShadow: '0 0 3px rgba(0,0,0,0.8)' }}>
-                  100 × 40 cm
-                </div>
+                {/* Display bounding boxes with measurements from the model */}
+                {measurementResults.objects.map((obj, index) => {
+                  // Check if we have bbox data
+                  if (!obj.bbox) return null;
+                  
+                  // Extract coordinates
+                  const [x1, y1, x2, y2] = obj.bbox;
+                  
+                  // Get container dimensions to scale the bounding box properly
+                  const containerElement = document.querySelector('.bg-gray-100.rounded-lg.relative');
+                  const containerWidth = containerElement?.clientWidth || 400;
+                  const containerHeight = containerElement?.clientHeight || 400;
+                  
+                  // Calculate image display dimensions (accounting for object-contain)
+                  const img = document.querySelector('.object-contain') as HTMLImageElement;
+                  let displayWidth = 0, displayHeight = 0, offsetX = 0, offsetY = 0;
+                  
+                  if (img) {
+                    const imgWidth = img.naturalWidth;
+                    const imgHeight = img.naturalHeight;
+                    
+                    // Calculate display dimensions maintaining aspect ratio
+                    if (imgWidth / imgHeight > containerWidth / containerHeight) {
+                      // Image is wider than container relative to height
+                      displayWidth = containerWidth;
+                      displayHeight = imgHeight * (containerWidth / imgWidth);
+                      offsetY = (containerHeight - displayHeight) / 2;
+                    } else {
+                      // Image is taller than container relative to width
+                      displayHeight = containerHeight;
+                      displayWidth = imgWidth * (containerHeight / imgHeight);
+                      offsetX = (containerWidth - displayWidth) / 2;
+                    }
+                    
+                    // Scale bbox coordinates to display dimensions
+                    const scaledX1 = (x1 / imgWidth) * displayWidth + offsetX;
+                    const scaledY1 = (y1 / imgHeight) * displayHeight + offsetY;
+                    const scaledWidth = ((x2 - x1) / imgWidth) * displayWidth;
+                    const scaledHeight = ((y2 - y1) / imgHeight) * displayHeight;
+                    
+                    return (
+                      <div 
+                        key={index}
+                        className="absolute"
+                        style={{ 
+                          left: `${scaledX1}px`, 
+                          top: `${scaledY1}px`, 
+                          width: `${scaledWidth}px`, 
+                          height: `${scaledHeight}px`, 
+                          border: '2px solid #3B82F6', 
+                          borderRadius: '4px',
+                          boxShadow: '0 0 0 1px rgba(0,0,0,0.1)',
+                          zIndex: 10
+                        }}
+                      >
+                        {/* Measurement label */}
+                        <div 
+                          className="absolute -top-7 left-0 right-0 mx-auto px-2 py-1 bg-blue-600 text-white text-xs font-semibold rounded flex items-center justify-center max-w-fit"
+                          style={{ 
+                            textShadow: '0 0 3px rgba(0,0,0,0.5)',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+                            zIndex: 20
+                          }}
+                        >
+                          {obj.name}: {obj.dimensions}
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  return null;
+                })}
               </div>
               
               {/* Results Details */}

@@ -67,14 +67,14 @@ export function Sidebar() {
             key={item.path} 
             href={item.path}
           >
-            <a className={`flex items-center px-6 py-3 ${
+            <div className={`flex items-center px-6 py-3 cursor-pointer ${
               isActive(item.path) 
                 ? 'text-primary bg-blue-50 border-l-4 border-primary' 
                 : 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent'
             }`}>
               {item.icon}
               {item.label}
-            </a>
+            </div>
           </Link>
         ))}
       </nav>

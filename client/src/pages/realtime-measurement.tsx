@@ -51,21 +51,54 @@ export default function RealtimeMeasurement() {
   };
   
   // Handle image capture
-  const handleCapture = useCallback((imageSrc: string) => {
+  const handleCapture = useCallback(async (imageSrc: string) => {
     setCapturedImage(imageSrc);
     setIsProcessing(true);
     
-    // Simulate processing with the ML model
-    setTimeout(() => {
-      // Mock measurement data - in a real app, this would come from the ML model
-      setMeasurementData({
-        objectName: "Chair",
-        dimensions: "60 × 55 × 80 cm",
-        confidence: 89
+    try {
+      // Use our custom ML model through the API
+      const response = await fetch('/api/model/measure', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: imageSrc,
+        }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success && result.measurements && result.measurements.length > 0) {
+        // Use the highest confidence result
+        const bestResult = result.measurements[0];
+        setMeasurementData({
+          objectName: bestResult.objectName,
+          dimensions: bestResult.dimensions,
+          confidence: Math.round(bestResult.confidence * 100)
+        });
+      } else {
+        toast({
+          title: "No objects detected",
+          description: "The model couldn't detect any objects in the image.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error processing image:', error);
+      toast({
+        title: "Processing Error",
+        description: error instanceof Error ? error.message : "Failed to process the image",
+        variant: "destructive"
+      });
+    } finally {
       setIsProcessing(false);
-    }, 2000);
-  }, []);
+    }
+  }, [toast]);
   
   // Save measurement to database
   const { mutate: saveMeasurement, isPending: isSaving } = useMutation({

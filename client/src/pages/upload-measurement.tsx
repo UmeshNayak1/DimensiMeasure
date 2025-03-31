@@ -53,34 +53,59 @@ export default function UploadMeasurement() {
   }, []);
 
   // Start measurement process
-  const handleStartMeasurement = useCallback(() => {
-    if (!selectedFile) return;
+  const handleStartMeasurement = useCallback(async () => {
+    if (!selectedFile || !imagePreview) return;
     
     setProcessingResults(true);
     
-    // Simulate processing delay (this would be a real API call in production)
-    setTimeout(() => {
-      // Mock results - in a real app, this would come from the ML model
-      const mockResults = {
-        objects: [
-          {
-            name: "Table (Top Surface)",
-            dimensions: "200 × 100 × 5 cm",
-            confidence: 92
-          },
-          {
-            name: "Table (Legs)",
-            dimensions: "100 × 40 × 73 cm",
-            confidence: 87
-          }
-        ]
-      };
+    try {
+      // Call our custom model API with the image data
+      const response = await fetch('/api/model/measure', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: imagePreview,
+        }),
+      });
       
-      setMeasurementResults(mockResults);
-      setShowResults(true);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success && result.measurements && result.measurements.length > 0) {
+        // Transform the measurements to match our UI format
+        const processedResults = {
+          objects: result.measurements.map((item: any) => ({
+            name: item.objectName,
+            dimensions: item.dimensions,
+            confidence: Math.round(item.confidence * 100)
+          }))
+        };
+        
+        setMeasurementResults(processedResults);
+        setShowResults(true);
+      } else {
+        toast({
+          title: "No objects detected",
+          description: "The model couldn't detect any objects in the image.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error processing image:', error);
+      toast({
+        title: "Processing Error",
+        description: error instanceof Error ? error.message : "Failed to process the image",
+        variant: "destructive"
+      });
+    } finally {
       setProcessingResults(false);
-    }, 2000);
-  }, [selectedFile]);
+    }
+  }, [selectedFile, imagePreview, toast]);
 
   // Save measurement results to the database
   const { mutate: saveMeasurement, isPending: isSaving } = useMutation({

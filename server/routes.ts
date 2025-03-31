@@ -4,8 +4,26 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
 import { insertMeasurementSchema } from "@shared/schema";
+import { modelClient } from "./model-client";
+import path from "path";
+
+// Variable to track the model server process
+let modelServerProcess: any = null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Start the Python model server
+  try {
+    // Use dynamic import for ES modules
+    import('../model/start_model_server.js').then(modelStarter => {
+      modelServerProcess = modelStarter.startModelServer();
+      console.log('Custom measurement model server started');
+    }).catch(err => {
+      console.error('Failed to import measurement model starter:', err);
+    });
+  } catch (error) {
+    console.error('Failed to start measurement model server:', error);
+  }
+
   // sets up /api/register, /api/login, /api/logout, /api/user
   setupAuth(app);
 
@@ -76,21 +94,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendStatus(204);
   });
 
-  // API endpoint for future ML model integration - object detection
-  app.post("/api/detect-object", (req, res) => {
+  // Check model health
+  app.get("/api/model/health", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    // This is a placeholder for the future ML model integration
-    // In a real implementation, this would call the ML model service
-    
-    res.json({
-      success: true,
-      message: "ML object detection integration placeholder. Will be implemented with actual model.",
-      objects: []
-    });
+    try {
+      const isAlive = await modelClient.isAlive();
+      res.json({ status: isAlive ? 'online' : 'offline' });
+    } catch (error) {
+      console.error("Error checking model health:", error);
+      res.status(500).json({ status: 'error', message: 'Failed to check model health' });
+    }
+  });
+
+  // Process image with custom model
+  app.post("/api/model/measure", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      if (!req.body.image) {
+        return res.status(400).json({ error: 'No image data provided' });
+      }
+
+      // Process the image with our custom model
+      const result = await modelClient.processMeasurement(req.body.image);
+
+      if (!result.success) {
+        return res.status(500).json({ 
+          error: result.message || 'Failed to process image' 
+        });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error("Error processing image with model:", error);
+      res.status(500).json({ 
+        error: 'Internal server error processing the image',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
   });
 
   const httpServer = createServer(app);
+  
+  // Clean up the model server when the HTTP server closes
+  httpServer.on('close', () => {
+    if (modelServerProcess) {
+      console.log('Stopping measurement model server...');
+      try {
+        modelServerProcess.kill();
+      } catch (error) {
+        console.error('Error stopping model server:', error);
+      }
+    }
+  });
 
   return httpServer;
 }

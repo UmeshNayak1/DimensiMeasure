@@ -1,15 +1,29 @@
 import { users, type User, type InsertUser, measurements, type Measurement, type InsertMeasurement } from "@shared/schema";
-import session from "express-session";
+import session, { Store } from "express-session";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import connectPgSimple from "connect-pg-simple";
+import 'dotenv/config';
 
-// Setup the session store
-const PgSession = connectPgSimple(session);
-const sessionStore = new PgSession({
-  conString: process.env.DATABASE_URL,
-  createTableIfMissing: true
-});
+// Setup the session store with error handling
+let sessionStore: Store;
+try {
+  const PgSession = connectPgSimple(session);
+  sessionStore = new PgSession({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: true,
+    tableName: 'session' // Explicit table name
+  });
+  console.log('PostgreSQL session store initialized successfully');
+} catch (error) {
+  console.error('Failed to initialize PostgreSQL session store:', error);
+  // Fallback to memory store if PostgreSQL connection fails
+  const MemoryStore = require('memorystore')(session);
+  sessionStore = new MemoryStore({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  });
+  console.log('Falling back to memory session store');
+}
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -30,11 +44,11 @@ export interface IStorage {
     avgSize: string;
   }>;
   
-  sessionStore: any; // Using 'any' to avoid type issues
+  sessionStore: Store;
 }
 
 export class DatabaseStorage implements IStorage {
-  sessionStore: any;
+  sessionStore: Store;
 
   constructor() {
     this.sessionStore = sessionStore;

@@ -1,0 +1,131 @@
+PS C:\Users\Umesh Nayak\Downloads\ObjectDimensionTracker (1)\ObjectDimensionTracker> npm run db:push
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file 'C:\Users\Umesh Nayak\Downloads\ObjectDimensionTracker (1)\ObjectDimensionTracker\drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[✓] Changes applied
+PS C:\Users\Umesh Nayak\Downloads\ObjectDimensionTracker (1)\ObjectDimensionTracker> npm run dev
+
+> rest-express@1.0.0 dev
+> tsx server/index.ts
+
+Starting model server on port 5001...
+Custom measurement model server started
+Uncaught exception: Error: listen ENOTSUP: operation not supported on socket 0.0.0.0:5000
+    at Server.setupListenHandle [as _listen2] (node:net:1915:21)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ENOTSUP',
+  errno: -4049,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 5000
+}
+PS C:\Users\Umesh Nayak\Downloads\ObjectDimensionTracker (1)\ObjectDimensionTracker> npm run dev
+
+> rest-express@1.0.0 dev
+> tsx server/index.ts
+
+Starting model server on port 5001...
+Custom measurement model server started
+[express] serving on port 5000
+[Model Server Error] C:\Users\Umesh Nayak\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\hub.py:330: UserWarning: You are about to download and run code from an untrusted repository. In a future release, this won't be allowed. To add the repository to your trusted list, change the command to {calling_fn}(..., trust_repo=False) and a command prompt will appear asking for an explicit confirmation of trust, or load(..., trust_repo=True), which will assume that the prompt is to be answered with 'yes'. You can also use load(..., trust_repo='check') which will only prompt for confirmation if the repo is not already trusted. This will eventually be the default behaviour
+  warnings.warn(
+[Model Server Error] Downloading: "https://github.com/ultralytics/yolov5/zipball/master" to C:\Users\Umesh Nayak/.cache\torch\hub\master.zip
+[Model Server] Using device: cpu
+[Model Server] requirements: Ultralytics requirement ['gitpython>=3.1.30'] not found, attempting AutoUpdate...
+[Model Server] Collecting gitpython>=3.1.30
+  Downloading GitPython-3.1.44-py3-none-any.whl.metadata (13 kB)
+Collecting gitdb<5,>=4.0.1 (from gitpython>=3.1.30)
+  Downloading gitdb-4.0.12-py3-none-any.whl.metadata (1.2 kB)
+Collecting smmap<6,>=3.0.1 (from gitdb<5,>=4.0.1->gitpython>=3.1.30)
+  Downloading smmap-5.0.2-py3-none-any.whl.metadata (4.3 kB)
+Downloading GitPython-3.1.44-py3-none-any.whl (207 kB)
+Downloading gitdb-4.0.12-py3-none-any.whl (62 kB)
+Downloading smmap-5.0.2-py3-none-any.whl (24 kB)
+Installing collected packages: smmap, gitdb, gitpython
+Successfully installed gitdb-4.0.12 gitpython-3.1.44 smmap-5.0.2
+[Model Server Error] YOLOv5  2025-3-31 Python-3.12.6 torch-2.6.0+cpu CPU
+[Model Server] requirements: AutoUpdate success ✅ 9.4s, installed 1 package: ['gitpython>=3.1.30']
+requirements: ⚠️ Restart runtime or rerun command for updates to take effect
+[Model Server Error] Downloading https://github.com/ultralytics/yolov5/releases/download/v7.0/yolov5s.pt to yolov5s.pt...
+[Model Server Error] 0%|          | 0.00/14.1M [00:00<?, ?B/s]
+[Model Server Error] 1%|          | 128k/14.1M [00:00<00:11, 1.26MB/s]
+[Model Server Error] 2%|1         | 256k/14.1M [00:00<00:11, 1.24MB/s]
+[Model Server Error] 4%|3         | 512k/14.1M [00:00<00:08, 1.78MB/s]
+[Model Server Error] 6%|6         | 896k/14.1M [00:00<00:06, 2.09MB/s]
+[Model Server Error] 9%|8         | 1.25M/14.1M [00:00<00:05, 2.33MB/s]
+[Model Server Error] 11%|#         | 1.50M/14.1M [00:00<00:06, 2.03MB/s]
+[Model Server Error] 12%|#2        | 1.75M/14.1M [00:00<00:06, 2.05MB/s]
+[Model Server Error] 15%|#5        | 2.12M/14.1M [00:01<00:05, 2.36MB/s]
+[Model Server Error] 17%|#6        | 2.38M/14.1M [00:01<00:05, 2.29MB/s]
+[Model Server Error] 19%|#8        | 2.62M/14.1M [00:01<00:05, 2.26MB/s]
+[Model Server Error] 20%|##        | 2.88M/14.1M [00:01<00:05, 2.05MB/s]
+[Model Server Error] 23%|##3       | 3.25M/14.1M [00:01<00:05, 2.26MB/s]
+[Model Server Error] 26%|##5       | 3.62M/14.1M [00:01<00:04, 2.38MB/s]
+[Model Server Error] 28%|##8       | 4.00M/14.1M [00:01<00:04, 2.16MB/s]
+[Model Server Error] 30%|###       | 4.25M/14.1M [00:02<00:06, 1.67MB/s]
+[Model Server Error] 32%|###1      | 4.50M/14.1M [00:02<00:06, 1.60MB/s]
+[Model Server Error] 34%|###3      | 4.75M/14.1M [00:02<00:06, 1.59MB/s]
+[Model Server Error] 35%|###5      | 5.00M/14.1M [00:02<00:06, 1.55MB/s]
+[Model Server Error] 37%|###7      | 5.25M/14.1M [00:03<00:07, 1.32MB/s]
+[Model Server Error] 39%|###8      | 5.50M/14.1M [00:03<00:08, 1.12MB/s]
+[Model Server Error] 40%|###9      | 5.62M/14.1M [00:03<00:08, 1.10MB/s]
+[Model Server Error] 41%|####      | 5.75M/14.1M [00:03<00:08, 995kB/s]
+[Model Server Error] 42%|####1     | 5.88M/14.1M [00:03<00:08, 983kB/s]
+[Model Server Error] 42%|####2     | 6.00M/14.1M [00:03<00:08, 986kB/s]
+[Model Server Error] 43%|####3     | 6.12M/14.1M [00:04<00:09, 862kB/s]
+[Model Server Error] 44%|####4     | 6.25M/14.1M [00:04<00:09, 897kB/s]
+[Model Server Error] 46%|####6     | 6.50M/14.1M [00:04<00:06, 1.25MB/s]
+[Model Server Error] 48%|####7     | 6.75M/14.1M [00:04<00:05, 1.49MB/s]
+[Model Server Error] 50%|####9     | 7.00M/14.1M [00:04<00:04, 1.63MB/s]
+[Model Server Error] 51%|#####1    | 7.25M/14.1M [00:04<00:04, 1.57MB/s]
+[Model Server Error] 53%|#####3    | 7.50M/14.1M [00:04<00:04, 1.57MB/s]
+[Model Server Error] 55%|#####4    | 7.75M/14.1M [00:05<00:04, 1.65MB/s]
+[Model Server Error] 57%|#####6    | 8.00M/14.1M [00:05<00:03, 1.75MB/s]
+[Model Server Error] 58%|#####8    | 8.25M/14.1M [00:05<00:03, 1.71MB/s]
+[Model Server Error] 60%|######    | 8.50M/14.1M [00:05<00:03, 1.71MB/s]
+[Model Server Error] 62%|######1   | 8.75M/14.1M [00:05<00:03, 1.79MB/s]
+[Model Server Error] 65%|######4   | 9.12M/14.1M [00:05<00:02, 2.25MB/s]
+[Model Server Error] 68%|######8   | 9.62M/14.1M [00:05<00:01, 2.71MB/s]
+[Model Server Error] 72%|#######1  | 10.1M/14.1M [00:06<00:01, 3.07MB/s]
+[Model Server Error] 74%|#######4  | 10.5M/14.1M [00:06<00:01, 3.27MB/s]
+[Model Server Error] 77%|#######7  | 10.9M/14.1M [00:06<00:01, 3.38MB/s]
+[Model Server Error] 80%|#######9  | 11.2M/14.1M [00:06<00:00, 3.51MB/s]
+[Model Server Error] 83%|########3 | 11.8M/14.1M [00:06<00:00, 3.65MB/s]
+[Model Server Error] 87%|########6 | 12.2M/14.1M [00:06<00:00, 3.84MB/s]
+[Model Server Error] 89%|########9 | 12.6M/14.1M [00:06<00:00, 3.82MB/s]
+[Model Server Error] 92%|#########2| 13.0M/14.1M [00:06<00:00, 3.66MB/s]
+[Model Server Error] 95%|#########4| 13.4M/14.1M [00:06<00:00, 3.59MB/s]
+[Model Server Error] 97%|#########7| 13.8M/14.1M [00:07<00:00, 3.64MB/s]
+[Model Server Error] 100%|##########| 14.1M/14.1M [00:07<00:00, 3.71MB/s]
+[Model Server Error] 100%|##########| 14.1M/14.1M [00:07<00:00, 2.06MB/s]
+[Model Server Error]
+[Model Server Error] Fusing layers...
+[Model Server Error] YOLOv5s summary: 213 layers, 7225885 parameters, 0 gradients, 16.4 GFLOPs
+[Model Server Error] Adding AutoShape...
+[Model Server Error] * Tip: There are .env files present. Install python-dotenv to use them.
+[Model Server] YOLOv5 model loaded successfully
+ * Serving Flask app 'api'
+ * Debug mode: off
+[Model Server Error] WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.66.83:5001
+[Model Server Error] Press CTRL+C to quit
+2:40:05 PM [express] GET /api/user 401 in 4ms
+2:40:40 PM [express] POST /api/register 500 in 110ms :: {"message":"password authentication failed f…
+PostgresError: password authentication failed for user "Umesh Nayak"
+    at ErrorResponse (file:///C:/Users/Umesh%20Nayak/Downloads/ObjectDimensionTracker%20(1)/ObjectDimensionTracker/node_modules/postgres/src/connection.js:788:26)
+    at handle (file:///C:/Users/Umesh%20Nayak/Downloads/ObjectDimensionTracker%20(1)/ObjectDimensionTracker/node_modules/postgres/src/connection.js:474:6)       
+    at Socket.data (file:///C:/Users/Umesh%20Nayak/Downloads/ObjectDimensionTracker%20(1)/ObjectDimensionTracker/node_modules/postgres/src/connection.js:315:9)  
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:189:23)

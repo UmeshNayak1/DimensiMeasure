@@ -171,6 +171,82 @@ class MeasurementModel:
         
         return results
     
+    def draw_measurements(self, image, results):
+        """
+        Draw bounding boxes and measurements on the image
+        
+        Args:
+            image: Original image
+            results: Measurement results with bounding boxes
+            
+        Returns:
+            Image with bounding boxes and measurements drawn
+        """
+        image_with_boxes = image.copy()
+        
+        for result in results:
+            # Extract information
+            bbox = result['bbox']
+            dimensions = result['dimensions']
+            object_name = result['objectName']
+            confidence = result['confidence']
+            
+            # Define colors
+            box_color = (0, 255, 0)  # Green for bounding box
+            text_color = (255, 255, 255)  # White for text
+            bg_color = (0, 100, 0)  # Dark green for text background
+            
+            # Draw bounding box
+            x1, y1, x2, y2 = bbox
+            cv2.rectangle(image_with_boxes, (x1, y1), (x2, y2), box_color, 2)
+            
+            # Prepare text
+            label = f"{object_name} - {dimensions} ({confidence:.0%})"
+            
+            # Get text size
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 0.5
+            thickness = 1
+            (text_width, text_height), baseline = cv2.getTextSize(label, font, font_scale, thickness)
+            
+            # Draw text background
+            cv2.rectangle(image_with_boxes, 
+                        (x1, y1 - text_height - 10), 
+                        (x1 + text_width + 10, y1), 
+                        bg_color, -1)
+            
+            # Draw text
+            cv2.putText(image_with_boxes, label, 
+                      (x1 + 5, y1 - 5), 
+                      font, font_scale, text_color, thickness)
+        
+        return image_with_boxes
+        
+    def encode_image_to_base64(self, image):
+        """
+        Convert an image to base64 string
+        
+        Args:
+            image: OpenCV image
+            
+        Returns:
+            Base64 encoded string of the image
+        """
+        # Convert to RGB (from BGR)
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        
+        # Convert to PIL Image
+        pil_image = Image.fromarray(image_rgb)
+        
+        # Save to bytes buffer
+        buffer = io.BytesIO()
+        pil_image.save(buffer, format='JPEG')
+        
+        # Convert to base64
+        img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        
+        return f"data:image/jpeg;base64,{img_str}"
+    
     def process_image(self, image_data):
         """
         Process an image and return the measurement results
@@ -179,7 +255,8 @@ class MeasurementModel:
             image_data: Image data (base64, file path, or numpy array)
             
         Returns:
-            Measurement results including object names, dimensions, and confidence
+            Measurement results including object names, dimensions, confidence and
+            the image with bounding boxes drawn
         """
         try:
             # Preprocess the image
@@ -202,10 +279,17 @@ class MeasurementModel:
             # Sort by confidence (highest first)
             results.sort(key=lambda x: x['confidence'], reverse=True)
             
+            # Draw bounding boxes and measurements on the image
+            annotated_image = self.draw_measurements(image, results)
+            
+            # Convert the annotated image to base64
+            image_base64 = self.encode_image_to_base64(annotated_image)
+            
             return {
                 'success': True,
                 'message': f'Detected {len(results)} objects',
-                'measurements': results
+                'measurements': results,
+                'annotatedImage': image_base64
             }
             
         except Exception as e:

@@ -88,6 +88,11 @@ export default function UploadMeasurement() {
           }))
         };
         
+        // If we have an annotated image with bounding boxes, use it
+        if (result.annotatedImage) {
+          setImagePreview(result.annotatedImage);
+        }
+        
         setMeasurementResults(processedResults);
         setShowResults(true);
       } else {

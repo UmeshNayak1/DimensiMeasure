@@ -125,6 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Include the annotated image in the response
       res.json(result);
     } catch (error) {
       console.error("Error processing image with model:", error);

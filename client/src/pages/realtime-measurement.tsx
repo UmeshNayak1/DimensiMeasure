@@ -83,6 +83,11 @@ export default function RealtimeMeasurement() {
           confidence: Math.round(bestResult.confidence * 100),
           bbox: bestResult.bbox, // Include the bounding box data
         });
+        
+        // If we have an annotated image with bounding boxes, use it
+        if (result.annotatedImage) {
+          setCapturedImage(result.annotatedImage);
+        }
       } else {
         toast({
           title: "No objects detected",

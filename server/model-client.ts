@@ -12,6 +12,7 @@ interface MeasurementResult {
     confidence: number;
     bbox: [number, number, number, number];
   }>;
+  annotatedImage?: string; // Base64 encoded image with bounding boxes and measurements
 }
 
 /**

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,8 @@ import { Loader2, Cloud, Camera, Eye, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Measurement } from '@shared/schema';
 import { Link } from 'wouter';
+import { MeasurementDetailDialog } from '@/components/measurement/measurement-detail-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface RecentMeasurementsProps {
   measurements: Measurement[];
@@ -21,6 +24,39 @@ export function RecentMeasurements({
   onDelete,
   isDeletingId 
 }: RecentMeasurementsProps) {
+  const [selectedMeasurement, setSelectedMeasurement] = useState<Measurement | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const { toast } = useToast();
+  
+  // Query for the selected measurement detail
+  const { data: measurementDetail, refetch, isLoading: isLoadingDetail } = useQuery({
+    queryKey: ['/api/measurements', selectedMeasurement?.id],
+    queryFn: async () => {
+      if (!selectedMeasurement) return null;
+      const res = await fetch(`/api/measurements/${selectedMeasurement.id}`);
+      if (!res.ok) throw new Error('Failed to fetch measurement details');
+      return res.json();
+    },
+    enabled: false // Don't run automatically, we'll trigger it manually
+  });
+  
+  const handleViewMeasurement = async (measurement: Measurement) => {
+    setSelectedMeasurement(measurement);
+    
+    try {
+      // Refetch the detailed measurement data
+      await refetch();
+      setIsDialogOpen(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load measurement details",
+        variant: "destructive"
+      });
+      console.error("Error fetching measurement details:", error);
+    }
+  };
   return (
     <Card className="border border-gray-200">
       <CardHeader className="border-b border-gray-200 bg-white">
@@ -84,6 +120,7 @@ export function RecentMeasurements({
                         variant="ghost" 
                         size="sm"
                         className="text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50"
+                        onClick={() => handleViewMeasurement(item)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         View
@@ -112,11 +149,19 @@ export function RecentMeasurements({
       </div>
       {measurements.length > 0 && (
         <CardFooter className="p-4 border-t border-gray-200 bg-gray-50">
-          <Link href="/" className="text-sm font-medium text-primary hover:text-blue-700">
-            View all measurements →
+          <Link href="/analytics" className="text-sm font-medium text-primary hover:text-blue-700">
+            View analytics →
           </Link>
         </CardFooter>
       )}
+      
+      {/* Measurement detail dialog */}
+      <MeasurementDetailDialog
+        measurement={measurementDetail || selectedMeasurement}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        isLoading={isLoadingDetail}
+      />
     </Card>
   );
 }

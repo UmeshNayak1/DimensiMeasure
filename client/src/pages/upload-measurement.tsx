@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/use-auth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useMutation } from '@tanstack/react-query';
@@ -21,6 +22,9 @@ export default function UploadMeasurement() {
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [annotatedImage, setAnnotatedImage] = useState<string | null>(null);
+  const [showAnnotated, setShowAnnotated] = useState(true);
   const [measurementUnit, setMeasurementUnit] = useState('cm');
   const [referenceObject, setReferenceObject] = useState('none');
   const [sensitivity, setSensitivity] = useState([7]);
@@ -44,7 +48,9 @@ export default function UploadMeasurement() {
     // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImagePreview(reader.result as string);
+      const imageData = reader.result as string;
+      setImagePreview(imageData);
+      setOriginalImage(imageData);
     };
     reader.readAsDataURL(file);
     
@@ -88,9 +94,12 @@ export default function UploadMeasurement() {
           }))
         };
         
-        // If we have an annotated image with bounding boxes, use it
+        // If we have an annotated image with bounding boxes, store it
         if (result.annotatedImage) {
+          // Store the annotated image and display it by default
+          setAnnotatedImage(result.annotatedImage);
           setImagePreview(result.annotatedImage);
+          // We already stored the original image
         }
         
         setMeasurementResults(processedResults);
@@ -267,8 +276,27 @@ export default function UploadMeasurement() {
       {/* Results Section (Initially Hidden) */}
       {showResults && measurementResults && (
         <Card className="border border-gray-200">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-medium text-gray-800">Measurement Results</CardTitle>
+            
+            {/* Toggle for showing original or annotated image */}
+            {originalImage && annotatedImage && (
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="show-annotated" className="text-sm">
+                  {showAnnotated ? 'Showing Annotated' : 'Showing Original'}
+                </Label>
+                <Switch
+                  id="show-annotated"
+                  checked={showAnnotated}
+                  onCheckedChange={(checked: boolean) => {
+                    setShowAnnotated(checked);
+                    if (originalImage && annotatedImage) {
+                      setImagePreview(checked ? annotatedImage : originalImage);
+                    }
+                  }}
+                />
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">

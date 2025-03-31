@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/use-auth';
 import { useCamera } from '@/hooks/use-camera';
@@ -29,6 +30,9 @@ export default function RealtimeMeasurement() {
   const [highAccuracy, setHighAccuracy] = useState(false);
   
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [annotatedImage, setAnnotatedImage] = useState<string | null>(null);
+  const [showAnnotated, setShowAnnotated] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [measurementData, setMeasurementData] = useState<{
     objectName: string;
@@ -53,6 +57,7 @@ export default function RealtimeMeasurement() {
   
   // Handle image capture
   const handleCapture = useCallback(async (imageSrc: string) => {
+    setOriginalImage(imageSrc);
     setCapturedImage(imageSrc);
     setIsProcessing(true);
     
@@ -84,9 +89,13 @@ export default function RealtimeMeasurement() {
           bbox: bestResult.bbox, // Include the bounding box data
         });
         
-        // If we have an annotated image with bounding boxes, use it
+        // If we have an annotated image with bounding boxes, store and use it
         if (result.annotatedImage) {
-          setCapturedImage(result.annotatedImage);
+          setAnnotatedImage(result.annotatedImage);
+          // If showAnnotated is true, display the annotated image
+          if (showAnnotated) {
+            setCapturedImage(result.annotatedImage);
+          }
         }
       } else {
         toast({
@@ -105,7 +114,7 @@ export default function RealtimeMeasurement() {
     } finally {
       setIsProcessing(false);
     }
-  }, [toast]);
+  }, [toast, showAnnotated]);
   
   // Save measurement to database
   const { mutate: saveMeasurement, isPending: isSaving } = useMutation({
@@ -138,6 +147,8 @@ export default function RealtimeMeasurement() {
       
       // Reset for new measurement
       setCapturedImage(null);
+      setOriginalImage(null);
+      setAnnotatedImage(null);
       setMeasurementData(null);
     },
     onError: (error) => {
@@ -152,6 +163,8 @@ export default function RealtimeMeasurement() {
   // Start a new measurement (reset state)
   const handleNewMeasurement = () => {
     setCapturedImage(null);
+    setOriginalImage(null);
+    setAnnotatedImage(null);
     setMeasurementData(null);
   };
 
@@ -159,7 +172,26 @@ export default function RealtimeMeasurement() {
     <Layout>
       <Card className="border border-gray-200 mb-8">
         <CardHeader className="flex flex-wrap items-center justify-between border-b border-gray-200">
-          <CardTitle className="text-lg font-medium text-gray-800">Camera View</CardTitle>
+          <div className="flex items-center space-x-4">
+            <CardTitle className="text-lg font-medium text-gray-800">Camera View</CardTitle>
+            
+            {/* Toggle for showing original or annotated image */}
+            {originalImage && annotatedImage && measurementData && (
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="show-annotated" className="text-sm">
+                  {showAnnotated ? 'Showing Annotated' : 'Showing Original'}
+                </Label>
+                <Switch
+                  id="show-annotated"
+                  checked={showAnnotated}
+                  onCheckedChange={(checked: boolean) => {
+                    setShowAnnotated(checked);
+                    setCapturedImage(checked ? annotatedImage : originalImage);
+                  }}
+                />
+              </div>
+            )}
+          </div>
           
           <div className="flex space-x-2 mt-2 sm:mt-0">
             <Button

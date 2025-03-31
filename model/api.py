@@ -38,4 +38,6 @@ if __name__ == '__main__':
     port = int(os.environ.get('PYTHON_API_PORT', 5001))
     
     # Run the Flask app
-    app.run(host='0.0.0.0', port=port)
+    # For Windows compatibility, use 127.0.0.1 instead of 0.0.0.0
+    host = '127.0.0.1' if sys.platform.startswith('win') else '0.0.0.0'
+    app.run(host=host, port=port)

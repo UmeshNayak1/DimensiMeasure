@@ -66,12 +66,8 @@ app.use((req, res, next) => {
   // It is the only port that is not firewalled.
   const port = 5000;
   try {
-    // For Windows compatibility, don't specify host
-    server.listen({
-      port,
-      // Let Node choose appropriate binding
-      reusePort: true,
-    }, () => {
+    // Simple binding that works cross-platform (Windows, Linux, macOS)
+    server.listen(port, () => {
       log(`serving on port ${port}`);
     });
   } catch (error) {

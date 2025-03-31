@@ -1,8 +1,15 @@
 import { users, type User, type InsertUser, measurements, type Measurement, type InsertMeasurement } from "@shared/schema";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
+import connectPgSimple from "connect-pg-simple";
 
-const MemoryStore = createMemoryStore(session);
+// Setup the session store
+const PgSession = connectPgSimple(session);
+const sessionStore = new PgSession({
+  conString: process.env.DATABASE_URL,
+  createTableIfMissing: true
+});
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -23,67 +30,63 @@ export interface IStorage {
     avgSize: string;
   }>;
   
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Using 'any' to avoid type issues
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private measurements: Map<number, Measurement>;
-  currentUserId: number;
-  currentMeasurementId: number;
-  sessionStore: session.SessionStore;
+export class DatabaseStorage implements IStorage {
+  sessionStore: any;
 
   constructor() {
-    this.users = new Map();
-    this.measurements = new Map();
-    this.currentUserId = 1;
-    this.currentMeasurementId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
-    });
+    this.sessionStore = sessionStore;
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async getMeasurements(userId: number): Promise<Measurement[]> {
-    return Array.from(this.measurements.values())
-      .filter(measurement => measurement.userId === userId)
-      .sort((a, b) => {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA; // Sort descending (newest first)
-      });
+    const results = await db
+      .select()
+      .from(measurements)
+      .where(eq(measurements.userId, userId))
+      .orderBy(desc(measurements.createdAt));
+    
+    return results;
   }
 
   async getMeasurement(id: number): Promise<Measurement | undefined> {
-    return this.measurements.get(id);
+    const [measurement] = await db
+      .select()
+      .from(measurements)
+      .where(eq(measurements.id, id));
+    
+    return measurement || undefined;
   }
 
   async createMeasurement(insertMeasurement: InsertMeasurement): Promise<Measurement> {
-    const id = this.currentMeasurementId++;
-    const createdAt = new Date();
-    const measurement: Measurement = { ...insertMeasurement, id, createdAt };
-    this.measurements.set(id, measurement);
+    const [measurement] = await db
+      .insert(measurements)
+      .values(insertMeasurement)
+      .returning();
+    
     return measurement;
   }
 
   async deleteMeasurement(id: number): Promise<void> {
-    this.measurements.delete(id);
+    await db
+      .delete(measurements)
+      .where(eq(measurements.id, id));
   }
 
   async getUserStats(userId: number): Promise<{
@@ -92,6 +95,7 @@ export class MemStorage implements IStorage {
     savedImages: number;
     avgSize: string;
   }> {
+    // Get all user measurements
     const userMeasurements = await this.getMeasurements(userId);
     const totalMeasurements = userMeasurements.length;
     
@@ -138,4 +142,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

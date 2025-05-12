@@ -310,3 +310,211 @@ if __name__ == "__main__":
         print(json.dumps(result, indent=2))
     else:
         print("Please provide an image path to process")
+        
+# import cv2
+# import numpy as np
+# import torch
+# from PIL import Image, ImageOps
+# import base64
+# import io
+# import json
+# import os
+# import sys
+# from ultralytics import YOLO
+# from transformers import GLPNImageProcessor, GLPNForDepthEstimation
+
+# class MeasurementModel:
+#     def __init__(self):
+#         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#         print(f"Using device: {self.device}")
+
+#         try:
+#             self.model = YOLO("yolov8n.pt")
+#             print("YOLOv8n model loaded successfully")
+#         except Exception as e:
+#             print(f"Error loading YOLOv8n model: {e}")
+#             self.model = None
+
+#         try:
+#             self.processor = GLPNImageProcessor.from_pretrained("vinvino02/glpn-nyu")
+#             self.glpn = GLPNForDepthEstimation.from_pretrained("vinvino02/glpn-nyu").to(self.device)
+#             self.glpn.eval()
+#             print("GLPN model loaded successfully")
+#         except Exception as e:
+#             print(f"Error loading GLPN: {e}")
+#             self.glpn = None
+
+#         self.IMAGE_WIDTH_PIXELS = 1280
+#         self.IMAGE_HEIGHT_PIXELS = 720
+#         self.FOCAL_LENGTH_MM = 3.5
+#         self.SENSOR_WIDTH_MM = 3.6
+#         self.SENSOR_HEIGHT_MM = 2.7
+
+#         self.HFOV_rad = 2 * np.arctan((self.SENSOR_WIDTH_MM / 2) / self.FOCAL_LENGTH_MM)
+#         self.VFOV_rad = 2 * np.arctan((self.SENSOR_HEIGHT_MM / 2) / self.FOCAL_LENGTH_MM)
+#         self.HFOV_deg = np.degrees(self.HFOV_rad)
+#         self.VFOV_deg = np.degrees(self.VFOV_rad)
+
+#         self.depth_correction_factor = 0.61 / 1.29
+
+#     def preprocess_image(self, image_data):
+#         if isinstance(image_data, str):
+#             if image_data.startswith('data:image'):
+#                 base64_data = image_data.split(',')[1]
+#                 image_bytes = base64.b64decode(base64_data)
+#                 img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+#                 return img
+#             elif os.path.exists(image_data):
+#                 return Image.open(image_data).convert("RGB")
+#         elif isinstance(image_data, np.ndarray):
+#             return Image.fromarray(cv2.cvtColor(image_data, cv2.COLOR_BGR2RGB))
+#         raise ValueError("Unsupported image data format")
+
+#     def resize_with_padding(self, image, target_size=(640, 480)):
+#         return ImageOps.pad(image, target_size, method=Image.LANCZOS, color=(0, 0, 0), centering=(0.5, 0.5))
+
+#     def detect_objects(self, image):
+#         if self.model is None:
+#             return []
+#         img_np = np.array(self.resize_with_padding(image))
+#         results = self.model(img_np, verbose=False)
+#         detections = []
+#         for r in results:
+#             for box in r.boxes:
+#                 x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
+#                 conf = float(box.conf[0])
+#                 cls = int(box.cls[0])
+#                 class_name = self.model.names[cls]
+#                 detections.append({
+#                     'class': class_name,
+#                     'confidence': conf,
+#                     'bbox': [x1, y1, x2, y2]
+#                 })
+#         return detections
+
+#     def estimate_depth(self, image):
+#         if self.glpn is None:
+#             return np.ones(image.size[::-1], dtype=np.float32)
+
+#         resized_img = self.resize_with_padding(image, target_size=(640, 480))
+#         inputs = self.processor(images=resized_img, return_tensors="pt").to(self.device)
+#         with torch.no_grad():
+#             depth_output = self.glpn(**inputs).predicted_depth
+
+#         depth_map = torch.nn.functional.interpolate(
+#             depth_output.unsqueeze(1),
+#             size=resized_img.size[::-1],
+#             mode="bicubic",
+#             align_corners=False,
+#         ).squeeze().cpu().numpy()
+
+#         return depth_map
+
+#     def calculate_dimensions(self, image, detections):
+#         depth_map = self.estimate_depth(image)
+#         orig_w, orig_h = image.size
+#         results = []
+#         scale_x, scale_y = orig_w / 640, orig_h / 480
+
+#         for detection in detections:
+#             x1, y1, x2, y2 = detection['bbox']
+#             scaled_x_min = int(x1 * scale_x)
+#             scaled_y_min = int(y1 * scale_y)
+#             scaled_x_max = int(x2 * scale_x)
+#             scaled_y_max = int(y2 * scale_y)
+
+#             object_region = depth_map[y1:y2, x1:x2]
+#             if object_region.size > 0:
+#                 object_region = object_region[(object_region > 0) & (object_region < 10)]
+#                 median_depth = np.median(object_region) if object_region.size > 0 else 0
+#             else:
+#                 median_depth = 0
+
+#             median_depth *= self.depth_correction_factor
+
+#             pixel_width = scaled_x_max - scaled_x_min
+#             pixel_height = scaled_y_max - scaled_y_min
+
+#             real_width = 2 * median_depth * np.tan(np.radians(self.HFOV_deg / 2)) * (pixel_width / orig_w)
+#             real_height = 2 * median_depth * np.tan(np.radians(self.VFOV_deg / 2)) * (pixel_height / orig_h)
+
+#             dimensions = f"{real_width:.2f}×{real_height:.2f} m"
+
+#             results.append({
+#                 'objectName': detection['class'],
+#                 'dimensions': dimensions,
+#                 'confidence': detection['confidence'],
+#                 'bbox': [scaled_x_min, scaled_y_min, scaled_x_max, scaled_y_max]
+#             })
+
+#         return results
+
+#     def draw_measurements(self, image, results):
+#         img_np = np.array(image)
+#         img_bgr = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
+
+#         for result in results:
+#             x1, y1, x2, y2 = result['bbox']
+#             label = f"{result['objectName']} - {result['dimensions']} ({result['confidence']:.0%})"
+
+#             cv2.rectangle(img_bgr, (x1, y1), (x2, y2), (255, 105, 180), 2)
+#             font = cv2.FONT_HERSHEY_SIMPLEX
+#             font_scale = 0.5
+#             thickness = 1
+#             (text_width, text_height), baseline = cv2.getTextSize(label, font, font_scale, thickness)
+#             cv2.rectangle(img_bgr,
+#                           (x1, y1 - text_height - 10),
+#                           (x1 + text_width + 10, y1),
+#                           (139, 0, 70), -1)
+#             cv2.putText(img_bgr, label, (x1 + 5, y1 - 5), font, font_scale, (255, 255, 255), thickness)
+
+#         return cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+
+#     def encode_image_to_base64(self, image):
+#         pil_image = Image.fromarray(image)
+#         buffer = io.BytesIO()
+#         pil_image.save(buffer, format='JPEG')
+#         img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+#         return f"data:image/jpeg;base64,{img_str}"
+
+#     def process_image(self, image_data):
+#         try:
+#             image = self.preprocess_image(image_data)
+#             detections = self.detect_objects(image)
+#             results = self.calculate_dimensions(image, detections)
+
+#             if not results:
+#                 return {
+#                     'success': False,
+#                     'message': 'No objects detected',
+#                     'measurements': []
+#                 }
+
+#             results.sort(key=lambda x: x['confidence'], reverse=True)
+#             annotated_image = self.draw_measurements(image, results)
+#             image_base64 = self.encode_image_to_base64(annotated_image)
+
+#             return {
+#                 'success': True,
+#                 'message': f'Detected {len(results)} objects',
+#                 'measurements': results,
+#                 'annotatedImage': image_base64
+#             }
+
+#         except Exception as e:
+#             print(f"Error processing image: {e}")
+#             return {
+#                 'success': False,
+#                 'message': f'Error processing image: {str(e)}',
+#                 'measurements': []
+#             }
+
+# if __name__ == "__main__":
+#     if len(sys.argv) > 1:
+#         image_path = sys.argv[1]
+#         model = MeasurementModel()
+#         result = model.process_image(image_path)
+#         print(json.dumps(result, indent=2))
+#     else:
+#         print("Please provide an image path to process")
+        

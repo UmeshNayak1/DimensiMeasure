@@ -192,9 +192,9 @@ class MeasurementModel:
             confidence = result['confidence']
             
             # Define colors
-            box_color = (0, 255, 0)  # Green for bounding box
+            box_color = (255, 105, 180)  # pink for bounding box
             text_color = (255, 255, 255)  # White for text
-            bg_color = (0, 100, 0)  # Dark green for text background
+            bg_color = (139, 0, 70)  # Dark green for text background
             
             # Draw bounding box
             x1, y1, x2, y2 = bbox
@@ -202,6 +202,7 @@ class MeasurementModel:
             
             # Prepare text
             label = f"{object_name} - {dimensions} ({confidence:.0%})"
+            
             
             # Get text size
             font = cv2.FONT_HERSHEY_SIMPLEX

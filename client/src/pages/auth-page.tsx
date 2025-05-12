@@ -87,7 +87,7 @@ export default function AuthPage() {
       <div className="w-full md:w-1/2 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 shadow-lg">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold text-primary">DimensionAI</h1>
+            <h1 className="text-3xl font-semibold text-primary">DimensiMeasure</h1>
             <p className="text-gray-600 mt-2">Object Dimension Measurement Platform</p>
           </div>
 
@@ -306,8 +306,8 @@ export default function AuthPage() {
         <div className="p-12 max-w-md text-white">
           <h2 className="text-3xl font-bold mb-6">Measure with Precision</h2>
           <p className="text-lg mb-8">
-            DimensionAI helps you accurately measure object dimensions using advanced 
-            computer vision and AI. Upload images or use your camera in real-time.
+            DimensiMeasure helps you accurately measure object dimensions using advanced 
+            computer vision. Upload images or use your camera in real-time.
           </p>
           <ul className="space-y-4">
             <li className="flex items-start">
@@ -322,12 +322,12 @@ export default function AuthPage() {
               </svg>
               <span>Upload images for accurate measurement</span>
             </li>
-            <li className="flex items-start">
+            {/* <li className="flex items-start">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>AI-powered object detection</span>
-            </li>
+            </li> */}
             <li className="flex items-start">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

@@ -47,10 +47,6 @@ The application consists of three main components:
 2. **Node.js Backend**: Manages authentication, data storage, and communicates with the model server
 3. **Python Model Server**: Processes images and performs object detection and measurement
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

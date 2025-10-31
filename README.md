@@ -1,4 +1,4 @@
-# 📏 Object Dimension Tracker ( DimensiMeasure )
+# 📏 Real Time Object Dimention Measurement Web Site( DimensiMeasure )
 
 **DimensiMeasure** is a cutting-edge web application designed for **precise, real-time object dimension measurement** using **advanced computer vision** and **machine learning** technologies. With robust support for both real-time camera input and image uploads, the platform offers a seamless user experience for accurate measurement, object detection, and result analytics.  
 

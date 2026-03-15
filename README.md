@@ -1,128 +1,179 @@
-# 📏 Real Time Object Dimention Measurement Web Site( DimensiMeasure )
+# 📏 Real-Time Object Dimension Measurement System
 
-**DimensiMeasure** is a cutting-edge web application designed for **precise, real-time object dimension measurement** using **advanced computer vision** and **machine learning** technologies. With robust support for both real-time camera input and image uploads, the platform offers a seamless user experience for accurate measurement, object detection, and result analytics.  
+A **Computer Vision based system** that measures the **real-world
+dimensions of objects in real time using a camera**.\
+This project uses **OpenCV and Machine Learning techniques** to detect
+objects and estimate their width and height directly from images or live
+webcam input.
 
-### 🌐 Accessible on both desktop and mobile devices.
+The system demonstrates how **image processing, object detection, and
+pixel-to-real-world scaling** can be used to automatically measure
+object dimensions.
 
----
+------------------------------------------------------------------------
 
-## 🚀 Features
+# 🚀 Project Overview
 
-- 🔐 **Secure Authentication** (Passport.js)
-- 📸 **Real-time Object Measurement** via webcam
-- 🖼️ **Image Upload Measurement** for offline analysis
-- 🧠 **YOLO Object Detection** and Python-based CV pipeline
-- 📊 **Interactive Dashboard** for history and analytics
-- 🗂️ **Persistent Data Storage** using PostgreSQL
-- 📱 **Responsive UI** for mobile & desktop
-- 🔁 **RESTful API Integration** between frontend, backend, and CV model
+Estimating the size of real-world objects using a camera is useful in
+many industries such as:
 
----
+-   📦 Logistics
+-   🏭 Manufacturing
+-   🤖 Robotics
+-   🛒 E‑commerce
+-   📏 Automated inspection systems
 
-## 🛠️ Tech Stack
+This project provides a **lightweight and efficient solution** that
+detects objects and calculates their **dimensions in real time** using
+computer vision.
 
-### Frontend:
-- **React** (with **TypeScript**)
-- **TailwindCSS** for styling
+------------------------------------------------------------------------
 
-### Backend:
-- **Node.js** & **Express.js**
-- **Passport.js** for authentication
-- **PostgreSQL** for database
+# ✨ Key Features
 
-### Machine Learning & CV:
-- **Python** with **Flask**
-- **OpenCV** for image processing
-- **YOLO** for real-time object detection
+✔ Real-time object detection using webcam\
+✔ Automatic edge and contour detection\
+✔ Width and height measurement of objects\
+✔ Pixel-to-real-world conversion for accurate measurement\
+✔ Bounding box visualization\
+✔ Works with both **images and live camera feed**
 
----
+------------------------------------------------------------------------
 
-## 📷 System Architecture
+# 🧠 How the System Works
 
-```
-[User Interface: React + TailwindCSS] 
-        ⬇️
-[REST API: Express.js + Node.js + Passport.js] 
-        ⬇️
-[Python Server: Flask + YOLO + OpenCV] 
-        ⬇️
-[PostgreSQL: Persistent Storage of Users, History, Analytics]
-```
+The system follows a computer vision pipeline:
 
----
+1️⃣ **Image Capture**\
+The camera captures the input frame.
 
-## 🧪 How to Run Locally
+2️⃣ **Image Preprocessing**\
+The image is converted to grayscale and blurred to remove noise.
 
-### 1. Clone the Repo
+3️⃣ **Edge Detection**\
+Edges of objects are detected using OpenCV techniques.
 
-```bash
-git clone https://github.com/yourusername/dimensimeasure.git
-cd dimensimeasure
-```
+4️⃣ **Contour Detection**\
+Contours are extracted to identify the object's boundary.
 
-### 2. Setup Frontend (React + TS)
+5️⃣ **Reference Calibration**\
+A reference object is used to calculate the **pixels-per-metric ratio**.
 
-```bash
-cd client
-npm install
-npm run dev
-```
+6️⃣ **Dimension Calculation**\
+The width and height of the object are calculated using geometric
+formulas.
 
-### 3. Setup Backend (Node + Express)
+7️⃣ **Visualization**\
+The measured dimensions are displayed directly on the screen.
 
-```bash
-cd server
-npm install
-npm run dev
-```
+------------------------------------------------------------------------
 
-### 4. Setup Python Flask API
+# 🛠 Tech Stack
 
-```bash
-cd python-cv
-pip install -r requirements.txt
-python app.py
-```
+### Programming Language
 
-### 5. Database Setup (PostgreSQL)
+-   Python
 
-Ensure PostgreSQL is running. Create a DB and update the credentials in your backend config file (`.env`).
+### Libraries
 
-```env
-DB_HOST=localhost
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_NAME=dimensimeasure
-```
+-   OpenCV
+-   NumPy
+-   imutils
 
----
+### Tools
 
-## 🧩 Key Functionalities
+-   Webcam / Camera
+-   VS Code / PyCharm
+-   Git & GitHub
 
-- **Real-time Detection** with dimension overlay
-- **History Page** with previous measurements
-- **Analytics Page** (most common objects, average sizes, etc.)
-- **Profile & Logout**
+------------------------------------------------------------------------
 
----
+# 📂 Project Structure
 
-## 📁 Folder Structure (Simplified)
+    Real-time-Object-Dimension-Measument-System
+    │
+    ├── measure_object_size.py
+    ├── measure_object_size_camera.py
+    ├── object_detector.py
+    ├── images/
+    │   └── sample images
+    ├── output/
+    │   └── measured results
+    └── README.md
 
-```
-dimensimeasure/
-│
-├── client/                # React + Tailwind Frontend
-├── server/                # Node.js + Express Backend
-├── python-cv/             # Flask + YOLO + OpenCV
-├── database/              # PostgreSQL schema/setup scripts
-└── README.md
+------------------------------------------------------------------------
+
+# ⚙️ Installation
+
+### 1. Clone the Repository
+
+``` bash
+git clone https://github.com/UmeshNayak1/Real-time-Object-Dimension-Measument-System-.git
 ```
 
----
+### 2. Navigate to Project Folder
 
-## ✅ Future Improvements
+``` bash
+cd Real-time-Object-Dimension-Measument-System-
+```
 
-- Calibration for camera distance
-- Multi-object measurement
-- Export to PDF/CSV
-- Voice input support
+### 3. Install Dependencies
+
+``` bash
+pip install opencv-python numpy imutils
+```
+
+------------------------------------------------------------------------
+
+# ▶️ Usage
+
+### Run with Webcam
+
+``` bash
+python measure_object_size_camera.py
+```
+
+### Run with Image
+
+``` bash
+python measure_object_size.py
+```
+
+The system will detect the object and display **width and height
+measurements** on the screen.
+
+------------------------------------------------------------------------
+
+# 📊 Applications
+
+-   📦 Product dimension measurement for e‑commerce
+-   🏭 Industrial quality control
+-   🤖 Robotics and automation
+-   🚚 Logistics and packaging systems
+-   🎓 Computer vision research and education
+
+------------------------------------------------------------------------
+
+# 🔮 Future Improvements
+
+-   Improve measurement accuracy using calibration
+-   Integrate **deep learning object detection (YOLO)**
+-   Support multiple objects measurement
+-   Build a **GUI interface**
+-   Convert the system into a **web application**
+
+------------------------------------------------------------------------
+
+# 📸 Example Output
+
+Detected objects will display:
+
+    Width: XX cm
+    Height: XX cm
+
+Bounding boxes and measurements are drawn directly on the object.
+
+
+
+⭐ If you found this project useful, consider **starring the
+repository**!
